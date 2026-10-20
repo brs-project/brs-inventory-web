@@ -1,0 +1,20 @@
+# Development Dockerfile for React 18 + Vite + TypeScript (inventory-web)
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Enable layer caching for npm dependencies
+COPY package.json package-lock.json ./
+
+# Install dependencies (use npm install or npm ci based on lockfile)
+RUN npm install
+
+# Copy application source code
+COPY . .
+
+# Expose Vite default development server port
+EXPOSE 5173
+
+# Start Vite dev server with host binding to allow container networking
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
