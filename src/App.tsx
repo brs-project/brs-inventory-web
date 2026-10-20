@@ -45,7 +45,7 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Toaster position="top-right" richColors closeButton />
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <ErrorBoundary>
           <Suspense fallback={<PageSkeleton />}>
           <Routes>

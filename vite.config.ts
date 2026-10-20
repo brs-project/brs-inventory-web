@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/brs-inventory-web/',
   plugins: [react()],
   resolve: {
     alias: {
