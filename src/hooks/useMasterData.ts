@@ -22,7 +22,15 @@ import {
   mockGodowns as initialMockGodowns,
   mockVehicles as initialMockVehicles,
 } from '@lib/mockData'
-import type { Party, Quality, Godown, Vehicle } from '@types'
+import {
+  fetchTransporters as apiFetchTransporters,
+  createTransporter as apiCreateTransporter,
+  updateTransporter as apiUpdateTransporter,
+  deleteTransporter as apiDeleteTransporter,
+  type CreateTransporterInput,
+  type UpdateTransporterInput,
+} from '@/services/transporterService'
+import type { Party, Quality, Godown, Vehicle, Transporter } from '@types'
 
 let persistentGodowns: Godown[] = [...initialMockGodowns]
 let persistentVehicles: Vehicle[] = [...initialMockVehicles]
@@ -464,5 +472,112 @@ export function useVehicles() {
     updateVehicle,
     deleteVehicle,
     toggleVehicleStatus,
+  }
+}
+
+// ============================================================================
+// 5. TRANSPORTERS HOOK (LIVE SUPABASE INTEGRATION)
+// ============================================================================
+export function useTransporters() {
+  const [transporters, setTransporters] = useState<Transporter[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const loadTransporters = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const data = await apiFetchTransporters()
+      setTransporters(data)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to fetch transporters from database'
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadTransporters()
+  }, [loadTransporters])
+
+  const createTransporter = async (data: CreateTransporterInput): Promise<Transporter> => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const created = await apiCreateTransporter(data)
+      setTransporters((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)))
+      toast.success(`Transporter "${created.name}" created successfully`)
+      return created
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create transporter'
+      setError(msg)
+      toast.error(msg)
+      throw err
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const updateTransporter = async (id: string, data: UpdateTransporterInput): Promise<Transporter> => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const updated = await apiUpdateTransporter(id, data)
+      setTransporters((prev) => prev.map((t) => (t.id === id ? updated : t)))
+      toast.success(`Transporter "${updated.name}" updated successfully`)
+      return updated
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update transporter'
+      setError(msg)
+      toast.error(msg)
+      throw err
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const deleteTransporter = async (id: string): Promise<boolean> => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      await apiDeleteTransporter(id)
+      setTransporters((prev) => prev.filter((t) => t.id !== id))
+      toast.success('Transporter removed successfully')
+      return true
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete transporter'
+      setError(msg)
+      toast.error(msg)
+      throw err
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const toggleTransporterStatus = async (id: string): Promise<Transporter> => {
+    const target = transporters.find((t) => t.id === id)
+    if (!target) throw new Error('Transporter not found')
+    return updateTransporter(id, { is_active: !target.is_active })
+  }
+
+  const stats = useMemo(() => {
+    const total = transporters.length
+    const active = transporters.filter((t) => t.is_active).length
+    const inactive = total - active
+    return { total, active, inactive }
+  }, [transporters])
+
+  return {
+    transporters,
+    stats,
+    isLoading,
+    error,
+    refresh: loadTransporters,
+    createTransporter,
+    updateTransporter,
+    deleteTransporter,
+    toggleTransporterStatus,
   }
 }

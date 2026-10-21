@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { X, Loader2, Save, Building2 } from 'lucide-react'
+import { X, Loader2, Save, Building2, User, Phone, MapPin, FileText } from 'lucide-react'
+import { cn } from '@lib/utils'
 import type { Party } from '@types'
 
 const INDIAN_STATES = [
@@ -39,6 +40,7 @@ const partySchema = z.object({
     .string()
     .min(2, 'Party name must be at least 2 characters')
     .max(255, 'Maximum 255 characters'),
+  party_type: z.enum(['BUYER', 'SELLER', 'BOTH']),
   contact_person: z.string().optional(),
   phone: z
     .string()
@@ -58,29 +60,29 @@ const partySchema = z.object({
       'Invalid GSTIN format (e.g. 27AABCU9603R1ZX)'
     )
     .optional(),
-  address: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
+  address: z.string().optional(),
   is_active: z.boolean(),
 })
 
 type PartyFormData = z.infer<typeof partySchema>
 
-interface PartyFormModalProps {
+export interface PartyModalProps {
   open: boolean
   onClose: () => void
   party?: Party | null
-  onSave: (data: Omit<Party, 'id' | 'created_at'>) => Promise<void>
+  onSave: (data: Omit<Party, 'id' | 'created_at'> & { types: ('BUYER' | 'SELLER')[] }) => Promise<void>
   nextCode?: string
 }
 
-export function PartyFormModal({
+export function PartyModal({
   open,
   onClose,
   party,
   onSave,
   nextCode = 'P001',
-}: PartyFormModalProps) {
+}: PartyModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isEditing = Boolean(party)
 
@@ -96,44 +98,57 @@ export function PartyFormModal({
     defaultValues: {
       party_code: nextCode,
       party_name: '',
+      party_type: 'BUYER',
       contact_person: '',
       phone: '',
       gst_number: '',
-      address: '',
       city: '',
-      state: 'Gujarat',
+      state: 'Maharashtra',
+      address: '',
       is_active: true,
     },
   })
 
-  // Watch isActive value for custom toggle switch
-  const isActiveValue = watch('is_active')
+  const selectedType = watch('party_type')
+  const codeValue = watch('party_code')
 
-  // Reset form with party data or next auto-code when modal opens
+  // Determine initial party type from party.types
+  const getInitialPartyType = (p?: Party | null): 'BUYER' | 'SELLER' | 'BOTH' => {
+    if (!p) return 'BUYER'
+    const types = (p as any).types || []
+    const isBuyer = types.includes('BUYER')
+    const isSeller = types.includes('SELLER')
+    if (isBuyer && isSeller) return 'BOTH'
+    if (isSeller) return 'SELLER'
+    return 'BUYER'
+  }
+
   useEffect(() => {
     if (open) {
       if (party) {
         reset({
-          party_code: party.party_code,
-          party_name: party.party_name,
-          contact_person: party.contact_person || '',
-          phone: party.phone || '',
-          gst_number: party.gst_number || '',
-          address: party.address || '',
+          party_code: party.party_code || (party as any).code || '',
+          party_name: party.party_name || (party as any).name || '',
+          party_type: getInitialPartyType(party),
+          contact_person: party.contact_person || (party as any).contactPerson || '',
+          phone: party.phone || (party as any).phoneNumber || '',
+          gst_number: party.gst_number || (party as any).gstin || '',
           city: party.city || '',
-          state: party.state || 'Gujarat',
-          is_active: party.is_active,
+          state: party.state || 'Maharashtra',
+          address: party.address || '',
+          is_active: party.is_active !== undefined ? party.is_active : true,
         })
       } else {
         reset({
           party_code: nextCode,
           party_name: '',
+          party_type: 'BUYER',
           contact_person: '',
           phone: '',
           gst_number: '',
-          address: '',
           city: '',
-          state: 'Gujarat',
+          state: 'Maharashtra',
+          address: '',
           is_active: true,
         })
       }
@@ -145,22 +160,31 @@ export function PartyFormModal({
   const onSubmit = async (data: PartyFormData) => {
     setIsSubmitting(true)
     try {
+      const types: ('BUYER' | 'SELLER')[] =
+        data.party_type === 'BOTH'
+          ? ['BUYER', 'SELLER']
+          : data.party_type === 'SELLER'
+          ? ['SELLER']
+          : ['BUYER']
+
       await onSave({
         ...data,
         party_code: data.party_code.toUpperCase().trim(),
+        party_name: data.party_name.trim(),
         gst_number: data.gst_number ? data.gst_number.toUpperCase().trim() : undefined,
+        types,
       })
       onClose()
     } catch {
-      // Error handled by hook toast
+      // Error handled by caller
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 select-none">
-      {/* Semi-transparent Backdrop */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 select-none overflow-y-auto">
+      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
@@ -168,218 +192,203 @@ export function PartyFormModal({
       />
 
       {/* Modal Dialog Body */}
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-zinc-200/90 z-50 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-zinc-200/90 z-50 overflow-hidden flex flex-col max-h-[92vh] my-auto animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50 shrink-0">
+        <div className="px-6 py-4 border-b border-zinc-200/80 flex items-center justify-between bg-zinc-50/60 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-2xs">
+            <div className="p-2 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/60">
               <Building2 className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-zinc-900 leading-tight">
-                {isEditing ? `Edit Party — ${party?.party_name}` : 'Add New Party'}
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900 tracking-tight flex items-center gap-2">
+                <span>{isEditing ? 'Edit Trading Party' : 'Add New Trading Party'}</span>
+                {codeValue && (
+                  <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200/70">
+                    {codeValue}
+                  </span>
+                )}
               </h2>
               <p className="text-xs text-zinc-500">
-                {isEditing
-                  ? 'Update supply partner profile and GST registration'
-                  : 'Register a new vendor, supplier, or customer profile'}
+                Register trading accounts for raw material purchase (Seller) and finished goods sales (Buyer).
               </p>
             </div>
           </div>
-
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close dialog"
-            className="p-1.5 rounded-xl text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition focus:outline-none cursor-pointer"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition cursor-pointer"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Scrollable Form Content */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 overflow-y-auto space-y-4 flex-1">
-          {/* Row 1: Party Code & Party Name */}
+        {/* Form Body */}
+        <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto p-6 space-y-4">
+          {/* Row 1: Code & Name */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label
-                htmlFor="party_code"
-                className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5"
-              >
+              <label className="block text-xs font-semibold text-zinc-700 mb-1">
                 Party Code <span className="text-rose-500">*</span>
               </label>
               <input
-                id="party_code"
                 type="text"
-                disabled={isEditing || isSubmitting}
-                placeholder="P001"
                 {...register('party_code')}
-                className={`w-full px-3.5 py-2 text-sm rounded-xl border bg-zinc-50 uppercase font-mono font-bold transition focus:outline-none focus:bg-white ${
-                  errors.party_code
-                    ? 'border-rose-500 focus:ring-2 focus:ring-rose-100'
-                    : 'border-zinc-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100'
-                } disabled:bg-zinc-100 disabled:text-zinc-500`}
+                onChange={(e) => setValue('party_code', e.target.value.toUpperCase())}
+                placeholder="e.g. P001"
+                className={cn(
+                  'w-full px-3 py-2 text-xs sm:text-sm font-mono font-bold uppercase rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition',
+                  errors.party_code ? 'border-rose-400 bg-rose-50/20' : 'border-zinc-300'
+                )}
               />
               {errors.party_code && (
-                <p className="mt-1 text-xs text-rose-600 font-medium">
-                  {errors.party_code.message}
-                </p>
+                <p className="mt-1 text-xs text-rose-500 font-medium">{errors.party_code.message}</p>
               )}
             </div>
 
             <div className="sm:col-span-2">
-              <label
-                htmlFor="party_name"
-                className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5"
-              >
-                Party / Company Name <span className="text-rose-500">*</span>
+              <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                Company / Trade Name <span className="text-rose-500">*</span>
               </label>
               <input
-                id="party_name"
                 type="text"
-                disabled={isSubmitting}
-                placeholder="e.g. XYZ Traders & Metals Pvt Ltd"
                 {...register('party_name')}
-                className={`w-full px-3.5 py-2 text-sm rounded-xl border bg-zinc-50 transition focus:outline-none focus:bg-white ${
-                  errors.party_name
-                    ? 'border-rose-500 focus:ring-2 focus:ring-rose-100'
-                    : 'border-zinc-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100'
-                }`}
+                placeholder="e.g. Shree Om Scrap Traders"
+                className={cn(
+                  'w-full px-3 py-2 text-xs sm:text-sm rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition',
+                  errors.party_name ? 'border-rose-400 bg-rose-50/20' : 'border-zinc-300'
+                )}
               />
               {errors.party_name && (
-                <p className="mt-1 text-xs text-rose-600 font-medium">
-                  {errors.party_name.message}
-                </p>
+                <p className="mt-1 text-xs text-rose-500 font-medium">{errors.party_name.message}</p>
               )}
             </div>
           </div>
 
-          {/* Row 2: Contact Person & Phone */}
+          {/* Row 2: Trading Account Type (Buyer / Seller / Both) */}
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
+              Trading Account Type <span className="text-rose-500">*</span>
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setValue('party_type', 'BUYER')}
+                className={cn(
+                  'py-2 px-3 rounded-lg border text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer',
+                  selectedType === 'BUYER'
+                    ? 'bg-blue-50 border-blue-400 text-blue-700 shadow-2xs'
+                    : 'bg-zinc-50/60 border-zinc-200 text-zinc-600 hover:bg-zinc-100'
+                )}
+              >
+                <span>🏢 Buyer (Customer)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setValue('party_type', 'SELLER')}
+                className={cn(
+                  'py-2 px-3 rounded-lg border text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer',
+                  selectedType === 'SELLER'
+                    ? 'bg-amber-50 border-amber-400 text-amber-700 shadow-2xs'
+                    : 'bg-zinc-50/60 border-zinc-200 text-zinc-600 hover:bg-zinc-100'
+                )}
+              >
+                <span>📦 Seller (Supplier)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setValue('party_type', 'BOTH')}
+                className={cn(
+                  'py-2 px-3 rounded-lg border text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer',
+                  selectedType === 'BOTH'
+                    ? 'bg-purple-50 border-purple-400 text-purple-700 shadow-2xs'
+                    : 'bg-zinc-50/60 border-zinc-200 text-zinc-600 hover:bg-zinc-100'
+                )}
+              >
+                <span>🔄 Both (Buyer &amp; Seller)</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Row 3: GSTIN */}
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1 flex items-center gap-1">
+              <FileText className="h-3.5 w-3.5 text-zinc-400" />
+              GSTIN (Tax Identification)
+            </label>
+            <input
+              type="text"
+              maxLength={15}
+              {...register('gst_number')}
+              onChange={(e) => setValue('gst_number', e.target.value.toUpperCase())}
+              placeholder="e.g. 27AABCU9603R1ZX (15 chars)"
+              className={cn(
+                'w-full px-3 py-2 text-xs sm:text-sm font-mono uppercase rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition',
+                errors.gst_number ? 'border-rose-400 bg-rose-50/20' : 'border-zinc-300'
+              )}
+            />
+            {errors.gst_number && (
+              <p className="mt-1 text-xs text-rose-500 font-medium">{errors.gst_number.message}</p>
+            )}
+          </div>
+
+          {/* Row 4: Contact Person & Phone */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label
-                htmlFor="contact_person"
-                className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5"
-              >
+              <label className="block text-xs font-semibold text-zinc-700 mb-1 flex items-center gap-1">
+                <User className="h-3.5 w-3.5 text-zinc-400" />
                 Contact Person
               </label>
               <input
-                id="contact_person"
                 type="text"
-                disabled={isSubmitting}
-                placeholder="e.g. Rajesh Shah"
                 {...register('contact_person')}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-zinc-300 bg-zinc-50 transition focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+                placeholder="e.g. Rajesh Sharma"
+                className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-zinc-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
               />
             </div>
 
             <div>
-              <label
-                htmlFor="phone"
-                className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5"
-              >
-                Phone Number (10 Digits)
+              <label className="block text-xs font-semibold text-zinc-700 mb-1 flex items-center gap-1">
+                <Phone className="h-3.5 w-3.5 text-zinc-400" />
+                Phone Number
               </label>
               <input
-                id="phone"
                 type="tel"
                 maxLength={10}
-                disabled={isSubmitting}
-                placeholder="9876543210"
                 {...register('phone')}
-                className={`w-full px-3.5 py-2 text-sm rounded-xl border bg-zinc-50 font-mono transition focus:outline-none focus:bg-white ${
-                  errors.phone
-                    ? 'border-rose-500 focus:ring-2 focus:ring-rose-100'
-                    : 'border-zinc-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100'
-                }`}
+                placeholder="10-digit number (e.g. 9822012345)"
+                className={cn(
+                  'w-full px-3 py-2 text-xs sm:text-sm font-mono rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition',
+                  errors.phone ? 'border-rose-400 bg-rose-50/20' : 'border-zinc-300'
+                )}
               />
               {errors.phone && (
-                <p className="mt-1 text-xs text-rose-600 font-medium">
-                  {errors.phone.message}
-                </p>
+                <p className="mt-1 text-xs text-rose-500 font-medium">{errors.phone.message}</p>
               )}
             </div>
-          </div>
-
-          {/* Row 3: GST Number */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="gst_number"
-                className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5"
-              >
-                GST Number (GSTIN)
-              </label>
-              <input
-                id="gst_number"
-                type="text"
-                maxLength={15}
-                disabled={isSubmitting}
-                placeholder="e.g. 27AABCU9603R1ZX"
-                {...register('gst_number')}
-                className={`w-full px-3.5 py-2 text-sm rounded-xl border bg-zinc-50 uppercase font-mono transition focus:outline-none focus:bg-white ${
-                  errors.gst_number
-                    ? 'border-rose-500 focus:ring-2 focus:ring-rose-100'
-                    : 'border-zinc-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100'
-                }`}
-              />
-              {errors.gst_number && (
-                <p className="mt-1 text-xs text-rose-600 font-medium">
-                  {errors.gst_number.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Row 4: Full Address */}
-          <div>
-            <label
-              htmlFor="address"
-              className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5"
-            >
-              Registered Address
-            </label>
-            <textarea
-              id="address"
-              rows={2}
-              disabled={isSubmitting}
-              placeholder="Enter premise address, industrial zone, road name..."
-              {...register('address')}
-              className="w-full px-3.5 py-2 text-sm rounded-xl border border-zinc-300 bg-zinc-50 transition focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 resize-none"
-            />
           </div>
 
           {/* Row 5: City & State */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label
-                htmlFor="city"
-                className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5"
-              >
-                City / Town
+              <label className="block text-xs font-semibold text-zinc-700 mb-1 flex items-center gap-1">
+                <MapPin className="h-3.5 w-3.5 text-zinc-400" />
+                City
               </label>
               <input
-                id="city"
                 type="text"
-                disabled={isSubmitting}
-                placeholder="e.g. Mumbai"
                 {...register('city')}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-zinc-300 bg-zinc-50 transition focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+                placeholder="e.g. Jalna"
+                className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-zinc-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
               />
             </div>
 
             <div>
-              <label
-                htmlFor="state"
-                className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5"
-              >
-                State
-              </label>
+              <label className="block text-xs font-semibold text-zinc-700 mb-1">State</label>
               <select
-                id="state"
-                disabled={isSubmitting}
                 {...register('state')}
-                className="w-full px-3.5 py-2 text-sm rounded-xl border border-zinc-300 bg-zinc-50 transition focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 cursor-pointer"
+                className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-zinc-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition cursor-pointer"
               >
                 {INDIAN_STATES.map((st) => (
                   <option key={st} value={st}>
@@ -390,49 +399,34 @@ export function PartyFormModal({
             </div>
           </div>
 
-          {/* Row 6: Is Active Toggle */}
-          <div className="pt-2">
-            <div className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-50 border border-zinc-200">
-              <div>
-                <span className="text-xs font-bold text-zinc-800 block">Active Status</span>
-                <span className="text-[11px] text-zinc-500">
-                  Allow this party to be selected in weighbridge inward/outward transactions
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setValue('is_active', !isActiveValue, { shouldDirty: true })}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  isActiveValue ? 'bg-indigo-600' : 'bg-zinc-300'
-                }`}
-                role="switch"
-                aria-checked={isActiveValue}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                    isActiveValue ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
+          {/* Row 6: Active Status */}
+          <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-200/80 bg-zinc-50/50">
+            <div>
+              <span className="text-xs font-semibold text-zinc-800 block">Active Status</span>
+              <span className="text-[11px] text-zinc-500 block">
+                Allow transactions, invoices, and vouchers with this party
+              </span>
             </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" {...register('is_active')} className="sr-only peer" />
+              <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+            </label>
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-4 border-t border-zinc-100 flex items-center justify-end gap-3 shrink-0">
+          <div className="pt-3 border-t border-zinc-200/80 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl border border-zinc-300 bg-white text-zinc-700 text-xs sm:text-sm font-semibold hover:bg-zinc-50 transition cursor-pointer"
+              className="py-2 px-4 rounded-xl border border-zinc-300 bg-white text-zinc-700 text-xs sm:text-sm font-semibold hover:bg-zinc-50 transition cursor-pointer"
             >
               Cancel
             </button>
-
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs sm:text-sm font-semibold shadow-md shadow-indigo-600/25 transition disabled:opacity-70 cursor-pointer"
+              className="py-2 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs sm:text-sm font-semibold shadow-md shadow-blue-600/20 transition flex items-center gap-2 disabled:opacity-70 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
@@ -453,4 +447,5 @@ export function PartyFormModal({
   )
 }
 
-export default PartyFormModal
+export default PartyModal
+export { PartyModal as PartyFormModal }

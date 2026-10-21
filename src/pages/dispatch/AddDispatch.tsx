@@ -128,6 +128,14 @@ export function AddDispatch() {
     e.preventDefault()
     setErrorBanner(null)
 
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    if (formData.dispatchDate > today || new Date(formData.dispatchDate) > new Date(today)) {
+      const msg = 'Future dates are not allowed. Please select today or a past date.';
+      toast.error(msg);
+      setErrorBanner(msg);
+      return;
+    }
+
     // Validation
     if (!formData.qualityGradeId) {
       const msg = 'Please select a quality grade'
@@ -417,8 +425,17 @@ export function AddDispatch() {
                       id="dispatchDate"
                       type="date"
                       required
+                      max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}
                       value={formData.dispatchDate}
-                      onChange={(e) => handleChange('dispatchDate', e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+                        if (val > today) {
+                          toast.error('Future dates are not allowed. Please select today or a past date.')
+                          return
+                        }
+                        handleChange('dispatchDate', val)
+                      }}
                       className="w-full pl-9 pr-3 py-2 text-xs font-medium rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition"
                     />
                   </div>

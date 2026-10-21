@@ -65,6 +65,13 @@ export function BasicInfoSection({
     }
   }, [calendarOpen])
 
+  const today = useMemo(() => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }), [])
+
+  const isNextMonthInFuture = useMemo(() => {
+    const nextMonthStart = startOfMonth(addMonths(currentMonth, 1))
+    return nextMonthStart.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }) > today
+  }, [currentMonth, today])
+
   const calendarDays = useMemo(() => {
     const start = startOfMonth(currentMonth)
     const end = endOfMonth(currentMonth)
@@ -101,7 +108,10 @@ export function BasicInfoSection({
               type="button"
               disabled={isSaving}
               onClick={() => {
-                setCurrentMonth(watchedDate || new Date())
+                const initialPickerDate = watchedDate && watchedDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }) <= today
+                  ? watchedDate
+                  : new Date()
+                setCurrentMonth(initialPickerDate)
                 setCalendarOpen(!calendarOpen)
               }}
               className={cn(
@@ -138,8 +148,15 @@ export function BasicInfoSection({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                      className="p-1 rounded-md hover:bg-zinc-100 text-zinc-600 transition cursor-pointer"
+                      disabled={isNextMonthInFuture}
+                      onClick={() => !isNextMonthInFuture && setCurrentMonth(addMonths(currentMonth, 1))}
+                      className={cn(
+                        'p-1 rounded-md transition',
+                        isNextMonthInFuture
+                          ? 'opacity-30 cursor-not-allowed pointer-events-none text-zinc-300'
+                          : 'hover:bg-zinc-100 text-zinc-600 cursor-pointer'
+                      )}
+                      title={isNextMonthInFuture ? 'Future months are disabled' : 'Next month'}
                     >
                       <ChevronRight className="h-3.5 w-3.5" />
                     </button>
@@ -158,6 +175,8 @@ export function BasicInfoSection({
                 {/* Day Grid */}
                 <div className="grid grid-cols-7 gap-1">
                   {calendarDays.map((day) => {
+                    const dayStr = day.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+                    const isFuture = dayStr > today
                     const isSelected = watchedDate && isSameDay(day, watchedDate)
                     const isCurrentDay = isToday(day)
                     const isCurrMonth = isSameMonth(day, currentMonth)
@@ -166,18 +185,23 @@ export function BasicInfoSection({
                       <button
                         key={day.toISOString()}
                         type="button"
+                        disabled={isFuture}
                         onClick={() => {
+                          if (isFuture) return
                           setValue('transaction_date', day, { shouldValidate: true })
                           setCalendarOpen(false)
                         }}
                         className={cn(
-                          'h-6 w-6 rounded-md text-xs font-medium flex items-center justify-center transition cursor-pointer',
-                          !isCurrMonth && 'text-zinc-300',
-                          isSelected
-                            ? 'bg-indigo-600 text-white font-bold shadow-2xs'
+                          'h-6 w-6 rounded-md text-xs font-medium flex items-center justify-center transition',
+                          isFuture
+                            ? 'text-gray-300 cursor-not-allowed pointer-events-none opacity-40 select-none'
+                            : !isCurrMonth
+                            ? 'text-zinc-300 hover:bg-zinc-100 cursor-pointer'
+                            : isSelected
+                            ? 'bg-indigo-600 text-white font-bold shadow-2xs cursor-pointer'
                             : isCurrentDay
-                            ? 'bg-indigo-50 text-indigo-700 font-bold border border-indigo-200'
-                            : 'text-zinc-700 hover:bg-zinc-100'
+                            ? 'bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 cursor-pointer'
+                            : 'text-zinc-700 hover:bg-zinc-100 cursor-pointer'
                         )}
                       >
                         {format(day, 'd')}

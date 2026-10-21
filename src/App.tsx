@@ -11,8 +11,8 @@ import { ErrorBoundary } from '@components/common/ErrorBoundary'
 const Login = lazy(() => import('@pages/auth/Login').then((m) => ({ default: m.Login })))
 const ForgotPassword = lazy(() => import('@pages/auth/ForgotPassword').then((m) => ({ default: m.ForgotPassword })))
 const Dashboard = lazy(() => import('@pages/dashboard/Dashboard').then((m) => ({ default: m.Dashboard })))
-const Parties = lazy(() => import('@pages/master/Parties').then((m) => ({ default: m.Parties })))
-const Qualities = lazy(() => import('@pages/master/Qualities').then((m) => ({ default: m.Qualities })))
+const MasterHub = lazy(() => import('@pages/master/MasterHub').then((m) => ({ default: m.MasterHub })))
+const Transports = lazy(() => import('@pages/master/Transports').then((m) => ({ default: m.Transports })))
 const AddTransaction = lazy(() => import('@pages/inventory/AddTransaction').then((m) => ({ default: m.AddTransaction })))
 const ViewTransactions = lazy(() => import('@pages/inventory/ViewTransactions').then((m) => ({ default: m.ViewTransactions })))
 const EditTransaction = lazy(() => import('@pages/inventory/EditTransaction').then((m) => ({ default: m.EditTransaction })))
@@ -24,6 +24,7 @@ const ViewBills = lazy(() => import('@pages/billing/ViewBills').then((m) => ({ d
 const EditBillEntry = lazy(() => import('@pages/billing/EditBillEntry').then((m) => ({ default: m.EditBillEntry })))
 const PendingRTGS = lazy(() => import('@pages/billing/PendingRTGS').then((m) => ({ default: m.PendingRTGS })))
 const DailyReport = lazy(() => import('@pages/reports/DailyReport').then((m) => ({ default: m.DailyReport })))
+const ItemWiseSaudaReport = lazy(() => import('@pages/reports/ItemWiseSaudaReport').then((m) => ({ default: m.ItemWiseSaudaReport })))
 const StockReport = lazy(() => import('@pages/reports/StockReport').then((m) => ({ default: m.StockReport })))
 const PartyReport = lazy(() => import('@pages/reports/PartyReport').then((m) => ({ default: m.PartyReport })))
 const VehicleReport = lazy(() => import('@pages/reports/VehicleReport').then((m) => ({ default: m.VehicleReport })))
@@ -64,8 +65,12 @@ export function App() {
               <Route path="/dashboard" element={<Dashboard />} />
 
               {/* Master Data Routes */}
-              <Route path="/master/parties" element={<Parties />} />
-              <Route path="/master/qualities" element={<Qualities />} />
+              <Route path="/master" element={<MasterHub />} />
+              <Route path="/master/parties" element={<MasterHub defaultTab="parties" />} />
+              <Route path="/master/transporters" element={<MasterHub defaultTab="transporters" />} />
+              <Route path="/master/qualities" element={<MasterHub defaultTab="grades" />} />
+              <Route path="/master/transports" element={<Transports />} />
+              <Route path="/master/vehicles" element={<Transports />} />
 
               {/* Inventory Routes */}
               <Route path="/inventory/add" element={<AddTransaction />} />
@@ -84,7 +89,10 @@ export function App() {
               <Route path="/billing/pending" element={<PendingRTGS />} />
 
               {/* Reports Routes */}
+              <Route path="/reports" element={<Navigate to="/reports/daily" replace />} />
               <Route path="/reports/daily" element={<DailyReport />} />
+              <Route path="/reports/sauda" element={<ItemWiseSaudaReport />} />
+              <Route path="/reports/item-wise-sauda" element={<ItemWiseSaudaReport />} />
               <Route path="/reports/stock" element={<StockReport />} />
               <Route path="/reports/party" element={<PartyReport />} />
               <Route path="/reports/vehicle" element={<VehicleReport />} />

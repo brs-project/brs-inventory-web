@@ -291,6 +291,7 @@ export function DispatchFilters({
                       </label>
                       <input
                         type="date"
+                        max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}
                         value={dateFrom}
                         onChange={(e) => updateFilterField('dateFrom', e.target.value)}
                         className="w-full px-2 py-1 bg-slate-50 border border-[#E5E7EB] rounded-md text-xs font-mono font-medium text-slate-900"
@@ -302,6 +303,7 @@ export function DispatchFilters({
                       </label>
                       <input
                         type="date"
+                        max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}
                         value={dateTo}
                         onChange={(e) => updateFilterField('dateTo', e.target.value)}
                         className="w-full px-2 py-1 bg-slate-50 border border-[#E5E7EB] rounded-md text-xs font-mono font-medium text-slate-900"

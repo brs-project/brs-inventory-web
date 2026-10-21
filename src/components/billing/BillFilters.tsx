@@ -415,6 +415,7 @@ export function BillFilters({
                   <div className="space-y-1.5">
                     <input
                       type="date"
+                      max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}
                       value={filters.dateFrom || ''}
                       onChange={(e) =>
                         onFiltersChange({ ...filters, dateFrom: e.target.value || undefined })
@@ -423,6 +424,7 @@ export function BillFilters({
                     />
                     <input
                       type="date"
+                      max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}
                       value={filters.dateTo || ''}
                       onChange={(e) =>
                         onFiltersChange({ ...filters, dateTo: e.target.value || undefined })

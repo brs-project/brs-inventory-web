@@ -4,3 +4,7 @@ export * from './gradesService'
 export * from './inventoryService'
 export * from './dispatchService'
 export * from './billingService'
+export * from './transportService'
+export * from './transporterService'
+
+export * from './reportService'

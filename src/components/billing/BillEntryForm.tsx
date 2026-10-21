@@ -33,7 +33,12 @@ import type { BillEntry } from '@types'
 const DRAFT_KEY = 'brs_bill_entry_draft_v2'
 
 const billFormSchema = z.object({
-  bill_date: z.string().min(1, 'Date is required'),
+  bill_date: z.string().min(1, 'Date is required').refine((val) => {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    return val <= today;
+  }, {
+    message: 'Future dates are not allowed. Please select today or a past date.',
+  }),
   bill_number: z.string().optional(),
   party_code: z.string().min(1, 'Party code is required'),
   party_id: z.string().min(1, 'Please select a valid party'),
@@ -395,6 +400,11 @@ export function BillEntryForm({
   )
 
         const onFormSubmit = async (data: BillFormData) => {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    if (data.bill_date > today || new Date(data.bill_date) > new Date(today)) {
+      toast.error('Future dates are not allowed. Please select today or a past date.');
+      return;
+    }
     const partyId = (data.party_id || '').trim();
     const qualityGradeId = (data.quality_id || '').trim();
 

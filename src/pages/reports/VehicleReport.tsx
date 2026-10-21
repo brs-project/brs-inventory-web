@@ -335,6 +335,7 @@ export function VehicleReport() {
           </label>
           <input
             type="date"
+            max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
@@ -347,6 +348,7 @@ export function VehicleReport() {
           </label>
           <input
             type="date"
+            max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"

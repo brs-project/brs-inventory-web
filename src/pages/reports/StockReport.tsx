@@ -292,6 +292,7 @@ export function StockReport() {
         </label>
         <input
           type="date"
+          max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}
           value={asOfDate}
           onChange={(e) => setAsOfDate(e.target.value)}
           className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"

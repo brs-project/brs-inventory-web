@@ -23,6 +23,7 @@ import {
 import { ReportLayout } from '@components/reports/ReportLayout'
 import { ReportToolbar } from '@components/reports/ReportToolbar'
 import { ReportTable, type ReportColumn, type ReportTotalsCell } from '@components/reports/ReportTable'
+import { ItemWiseSaudaTable } from '@components/reports/ItemWiseSaudaTable'
 import { useParties, useQualities, useGodowns } from '@hooks/useMasterData'
 import { useDailyReport, type DailyReportFilters } from '@hooks/useReports'
 import { exportToExcel } from '@lib/exportExcel'
@@ -51,6 +52,7 @@ export function DailyReport() {
   const [selectedParties, setSelectedParties] = useState<string[]>([])
   const [selectedQualities, setSelectedQualities] = useState<string[]>([])
   const [selectedGodown, setSelectedGodown] = useState<string>('all')
+  const [activeReportTab, setActiveReportTab] = useState<'weighbridge' | 'sauda'>('weighbridge')
   const [groupBy, setGroupBy] = useState<'none' | 'quality' | 'godown'>('none')
 
   // Quick Range Helper
@@ -343,6 +345,7 @@ export function DailyReport() {
           </label>
           <input
             type="date"
+            max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
@@ -355,6 +358,7 @@ export function DailyReport() {
           </label>
           <input
             type="date"
+            max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
@@ -523,6 +527,43 @@ export function DailyReport() {
       activeFiltersCount={activeFiltersCount}
       onResetFilters={handleResetFilters}
     >
+      {/* Mode Switcher Tabs */}
+      <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 no-print select-none">
+        <button
+          type="button"
+          onClick={() => setActiveReportTab('weighbridge')}
+          className={cn(
+            'flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer',
+            activeReportTab === 'weighbridge'
+              ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+          )}
+        >
+          Daily Weighbridge Ledger
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveReportTab('sauda')}
+          className={cn(
+            'flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2',
+            activeReportTab === 'sauda'
+              ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+          )}
+        >
+          <span>Item-Wise Sauda Rate Summary</span>
+          <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 font-bold">
+            Commercial
+          </span>
+        </button>
+      </div>
+
+      {activeReportTab === 'sauda' && (
+        <ItemWiseSaudaTable showToolbar={true} />
+      )}
+
+      {activeReportTab === 'weighbridge' && (
+        <>
       {/* Visual Chart Card */}
       {dailyTrend.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3 no-print">
@@ -599,6 +640,8 @@ export function DailyReport() {
         totals={totalsCells}
         emptyMessage="No weighbridge transactions match your specified date range or filter criteria."
       />
+        </>
+      )}
     </ReportLayout>
   )
 }

@@ -27,7 +27,12 @@ import type { DispatchEntry } from '@types'
 const LOCAL_STORAGE_DRAFT_KEY = 'dispatch_entry_form_draft_v2'
 
 const dispatchSchema = z.object({
-  dispatch_date: z.string().min(1, 'Date is required'),
+  dispatch_date: z.string().min(1, 'Date is required').refine((val) => {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    return val <= today;
+  }, {
+    message: 'Future dates are not allowed. Please select today or a past date.',
+  }),
   quality_id: z.string().min(1, 'Quality is required'),
   lorry_number: z.string().min(1, 'Lorry number is required'),
   bill_weight: z.number().positive('Weight must be greater than 0'),
@@ -302,6 +307,12 @@ export function DispatchEntryForm({
   // Submit handler
   const handleSubmit = async (targetStatus: 'draft' | 'dispatched') => {
     setErrors({})
+
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    if (dispatchDate > today || new Date(dispatchDate) > new Date(today)) {
+      toast.error('Future dates are not allowed. Please select today or a past date.');
+      return;
+    }
 
     const payload = {
       dispatch_date: dispatchDate,

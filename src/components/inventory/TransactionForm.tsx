@@ -22,6 +22,12 @@ import { FormActions } from './transaction-form/FormActions'
 export const transactionFormSchema = z.object({
   transaction_date: z.date({
     error: 'Date is required',
+  }).refine((date) => {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    const dStr = date.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    return dStr <= today;
+  }, {
+    message: 'Future dates are not allowed. Please select today or a past date.',
   }),
   party_id: z.string().min(1, 'From Party is required'),
   quality_id: z.string().min(1, 'Quality grade is required'),
@@ -269,6 +275,15 @@ export function TransactionForm({
 
   // Submit handler
   const handleFormSubmit = async (data: TransactionFormData) => {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    const transDateStr = data.transaction_date instanceof Date
+      ? data.transaction_date.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+      : new Date(data.transaction_date).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+
+    if (transDateStr > today || new Date(data.transaction_date) > new Date(today)) {
+      toast.error('Future dates are not allowed. Please select today or a past date.');
+      return;
+    }
     const partyId = (data.party_id || '').trim()
     const qualityGradeId = (data.quality_id || '').trim()
     const weightMt = Number(data.inward_weight)

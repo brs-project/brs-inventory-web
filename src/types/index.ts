@@ -13,6 +13,7 @@ export interface Party {
   id: string
   party_code: string
   party_name: string
+  types?: ('BUYER' | 'SELLER' | 'TRANSPORTER')[]
   contact_person?: string
   phone?: string
   address?: string
@@ -27,6 +28,7 @@ export interface Quality {
   id: string
   quality_code: string
   quality_name: string
+  default_rate_per_kg?: number
   description?: string
   unit_of_measure: string
   hsn_code?: string
@@ -45,6 +47,40 @@ export interface Godown {
   phone?: string
   is_active: boolean
   created_at: string
+}
+
+
+
+export interface Transporter {
+  id: string
+  name: string
+  contact_person: string | null
+  phone: string | null
+  city: string | null
+  is_active: boolean
+  created_at?: string
+  updated_at?: string
+}
+export interface Transport {
+  id: string
+  vehicle_number: string
+  transporter_id: string | null
+  transporter_name: string | null
+  driver_name: string | null
+  driver_phone: string | null
+  default_tare_weight_mt: number
+  default_freight_rate_per_mt: number
+  fixed_trip_charge: number
+  default_route: string | null
+  material_type: string | null
+  is_active: boolean
+  created_at?: string
+  updated_at?: string
+  parties?: {
+    name: string | null
+    code: string | null
+    phone: string | null
+  } | null
 }
 
 export interface Vehicle {

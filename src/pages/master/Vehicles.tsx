@@ -377,4 +377,5 @@ export function Vehicles() {
   )
 }
 
+export { Vehicles as Transports }
 export default Vehicles

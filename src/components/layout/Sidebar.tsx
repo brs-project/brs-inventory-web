@@ -19,6 +19,8 @@ import {
   UserCog,
   Settings,
   LogOut,
+  Layers,
+  TrendingUp,
 } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
 import { RoleBadge } from '@components/ui/RoleBadge'
@@ -50,9 +52,19 @@ const NAV_GROUPS: NavGroup[] = [
     groupTitle: 'MASTER DATA',
     items: [
       {
+        label: 'Master Hub',
+        path: '/master',
+        icon: <Layers className="h-4 w-4" />,
+      },
+      {
         label: 'Parties',
         path: '/master/parties',
         icon: <Users className="h-4 w-4" />,
+      },
+      {
+        label: 'Transporters',
+        path: '/master/transporters',
+        icon: <Truck className="h-4 w-4" />,
       },
       {
         label: 'Qualities',
@@ -120,6 +132,11 @@ const NAV_GROUPS: NavGroup[] = [
         icon: <Calendar className="h-4 w-4" />,
       },
       {
+        label: 'Item-Wise Sauda',
+        path: '/reports/sauda',
+        icon: <TrendingUp className="h-4 w-4" />,
+      },
+      {
         label: 'Stock Report',
         path: '/reports/stock',
         icon: <Boxes className="h-4 w-4" />,
@@ -154,7 +171,7 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ]
 
-interface SidebarProps {
+export interface SidebarProps {
   onItemClick?: () => void
   className?: string
 }

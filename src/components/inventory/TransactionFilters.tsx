@@ -235,6 +235,13 @@ function DatePickerPopover({
     }
   }, [open])
 
+  const today = useMemo(() => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }), [])
+
+  const isNextMonthInFuture = useMemo(() => {
+    const nextMonthStart = startOfMonth(addMonths(currentMonth, 1))
+    return nextMonthStart.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }) > today
+  }, [currentMonth, today])
+
   const calendarDays = useMemo(() => {
     const start = startOfMonth(currentMonth)
     const end = endOfMonth(currentMonth)
@@ -299,8 +306,15 @@ function DatePickerPopover({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                  className="p-1 rounded-md hover:bg-slate-100 text-slate-600 cursor-pointer"
+                  disabled={isNextMonthInFuture}
+                  onClick={() => !isNextMonthInFuture && setCurrentMonth(addMonths(currentMonth, 1))}
+                  className={cn(
+                    'p-1 rounded-md transition',
+                    isNextMonthInFuture
+                      ? 'opacity-30 cursor-not-allowed pointer-events-none text-slate-300'
+                      : 'hover:bg-slate-100 text-slate-600 cursor-pointer'
+                  )}
+                  title={isNextMonthInFuture ? 'Future months are disabled' : 'Next month'}
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
                 </button>
@@ -317,6 +331,8 @@ function DatePickerPopover({
 
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((day) => {
+                const dayStr = day.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+                const isFuture = dayStr > today
                 const isSelected = parsedValue && isSameDay(day, parsedValue)
                 const isCurrentDay = isToday(day)
                 const isCurrMonth = isSameMonth(day, currentMonth)
@@ -325,18 +341,23 @@ function DatePickerPopover({
                   <button
                     key={day.toISOString()}
                     type="button"
+                    disabled={isFuture}
                     onClick={() => {
+                      if (isFuture) return
                       onChange(day)
                       setOpen(false)
                     }}
                     className={cn(
-                      'h-6 w-6 rounded-md text-xs font-medium flex items-center justify-center transition cursor-pointer',
-                      !isCurrMonth && 'text-slate-300',
-                      isSelected
-                        ? 'bg-blue-600 text-white font-bold shadow-2xs'
+                      'h-6 w-6 rounded-md text-xs font-medium flex items-center justify-center transition',
+                      isFuture
+                        ? 'text-gray-300 cursor-not-allowed pointer-events-none opacity-40 select-none'
+                        : !isCurrMonth
+                        ? 'text-slate-300 hover:bg-slate-100 cursor-pointer'
+                        : isSelected
+                        ? 'bg-blue-600 text-white font-bold shadow-2xs cursor-pointer'
                         : isCurrentDay
-                        ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200'
-                        : 'text-slate-700 hover:bg-slate-100'
+                        ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200 cursor-pointer'
+                        : 'text-slate-700 hover:bg-slate-100 cursor-pointer'
                     )}
                   >
                     {format(day, 'd')}

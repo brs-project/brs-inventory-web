@@ -62,10 +62,17 @@ export function Topbar({
     switch (pathname) {
       case '/dashboard':
         return { title: 'Dashboard', section: 'Home', current: 'Overview' }
+      case '/master':
+        return { title: 'Master Data Hub', section: 'Master Data', current: 'Master Hub' }
+      case '/master/transporters':
+        return { title: 'Transporters Master', section: 'Master Data', current: 'Transporters' }
       case '/master/parties':
         return { title: 'Party Master', section: 'Master Data', current: 'Parties' }
       case '/master/qualities':
         return { title: 'Quality Master', section: 'Master Data', current: 'Qualities' }
+      case '/master/transports':
+      case '/master/vehicles':
+        return { title: 'Vehicles & Transports', section: 'Master Data', current: 'Transports' }
       case '/inventory/add':
         return { title: 'Add Transaction', section: 'Inventory', current: 'Add New' }
       case '/inventory/list':

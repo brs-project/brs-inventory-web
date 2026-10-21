@@ -68,6 +68,12 @@ export function MarkAsPaidModal({
     e.preventDefault()
     setError(null)
 
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+    if (paymentDate > today || new Date(paymentDate) > new Date(today)) {
+      setError('Future dates are not allowed. Please select today or a past date.')
+      return
+    }
+
     if (!rtgsReference.trim()) {
       setError('RTGS Reference / UTR Number is required')
       return
@@ -180,8 +186,17 @@ export function MarkAsPaidModal({
             </label>
             <input
               type="date"
+              max={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}
               value={paymentDate}
-              onChange={(e) => setPaymentDate(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value
+                const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+                if (val > today) {
+                  setError('Future dates are not allowed. Please select today or a past date.')
+                  return
+                }
+                setPaymentDate(val)
+              }}
               className="w-full h-9 px-3 rounded-lg border border-gray-200 bg-white text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-all"
             />
           </div>

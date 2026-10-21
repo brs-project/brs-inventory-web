@@ -25,7 +25,7 @@ export type Database = {
           after_json: Json | null
           before_json: Json | null
           client_ip: string | null
-          created_at: string
+          created_at: string | null
           entity: string
           entity_id: string
           id: number
@@ -37,7 +37,7 @@ export type Database = {
           after_json?: Json | null
           before_json?: Json | null
           client_ip?: string | null
-          created_at?: string
+          created_at?: string | null
           entity: string
           entity_id: string
           id?: number
@@ -49,7 +49,7 @@ export type Database = {
           after_json?: Json | null
           before_json?: Json | null
           client_ip?: string | null
-          created_at?: string
+          created_at?: string | null
           entity?: string
           entity_id?: string
           id?: number
@@ -60,8 +60,6 @@ export type Database = {
       }
       bill_settlements: {
         Row: {
-          quality_grade_id?: string | null
-          lorry_no?: string | null
           actual_rate: number
           bank_utr: string | null
           bill_date: string
@@ -70,10 +68,12 @@ export type Database = {
           created_at: string | null
           dispatch_id: string | null
           id: string
+          lorry_no: string | null
           notes: string | null
           party_id: string
           payment_mode: string | null
           payment_status: string | null
+          quality_grade_id: string | null
           quantity_kg: number | null
           quantity_mt: number
           rate_diff: number | null
@@ -82,8 +82,6 @@ export type Database = {
           settled_by: string | null
         }
         Insert: {
-          quality_grade_id?: string | null
-          lorry_no?: string | null
           actual_rate: number
           bank_utr?: string | null
           bill_date?: string
@@ -92,10 +90,12 @@ export type Database = {
           created_at?: string | null
           dispatch_id?: string | null
           id?: string
+          lorry_no?: string | null
           notes?: string | null
           party_id: string
           payment_mode?: string | null
           payment_status?: string | null
+          quality_grade_id?: string | null
           quantity_kg?: number | null
           quantity_mt: number
           rate_diff?: number | null
@@ -104,8 +104,6 @@ export type Database = {
           settled_by?: string | null
         }
         Update: {
-          quality_grade_id?: string | null
-          lorry_no?: string | null
           actual_rate?: number
           bank_utr?: string | null
           bill_date?: string
@@ -114,10 +112,12 @@ export type Database = {
           created_at?: string | null
           dispatch_id?: string | null
           id?: string
+          lorry_no?: string | null
           notes?: string | null
           party_id?: string
           payment_mode?: string | null
           payment_status?: string | null
+          quality_grade_id?: string | null
           quantity_kg?: number | null
           quantity_mt?: number
           rate_diff?: number | null
@@ -139,6 +139,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bill_settlements_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "view_party_turnover_summary"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "bill_settlements_quality_grade_id_fkey"
+            columns: ["quality_grade_id"]
+            isOneToOne: false
+            referencedRelation: "quality_grades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bill_settlements_quality_grade_id_fkey"
+            columns: ["quality_grade_id"]
+            isOneToOne: false
+            referencedRelation: "view_item_wise_sauda_summary"
+            referencedColumns: ["quality_grade_id"]
           },
         ]
       }
@@ -197,6 +218,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "dispatch_records_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "view_party_turnover_summary"
+            referencedColumns: ["party_id"]
+          },
+          {
             foreignKeyName: "dispatch_records_quality_grade_id_fkey"
             columns: ["quality_grade_id"]
             isOneToOne: false
@@ -204,11 +232,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "dispatch_records_quality_grade_id_fkey"
+            columns: ["quality_grade_id"]
+            isOneToOne: false
+            referencedRelation: "view_item_wise_sauda_summary"
+            referencedColumns: ["quality_grade_id"]
+          },
+          {
             foreignKeyName: "dispatch_records_transporter_id_fkey"
             columns: ["transporter_id"]
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispatch_records_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "view_party_turnover_summary"
+            referencedColumns: ["party_id"]
           },
           {
             foreignKeyName: "dispatch_records_trip_id_fkey"
@@ -226,7 +268,10 @@ export type Database = {
           is_voided: boolean
           logged_at: string | null
           logged_by: string | null
+          notes: string | null
+          party_id: string | null
           quality_grade_id: string
+          transaction_type: string | null
           trip_id: string
           weight_kg: number
           weight_mt: number | null
@@ -237,7 +282,10 @@ export type Database = {
           is_voided?: boolean
           logged_at?: string | null
           logged_by?: string | null
+          notes?: string | null
+          party_id?: string | null
           quality_grade_id: string
+          transaction_type?: string | null
           trip_id: string
           weight_kg: number
           weight_mt?: number | null
@@ -248,12 +296,29 @@ export type Database = {
           is_voided?: boolean
           logged_at?: string | null
           logged_by?: string | null
+          notes?: string | null
+          party_id?: string | null
           quality_grade_id?: string
+          transaction_type?: string | null
           trip_id?: string
           weight_kg?: number
           weight_mt?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "godown_chits_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "godown_chits_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "view_party_turnover_summary"
+            referencedColumns: ["party_id"]
+          },
           {
             foreignKeyName: "godown_chits_quality_grade_id_fkey"
             columns: ["quality_grade_id"]
@@ -262,70 +327,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "godown_chits_quality_grade_id_fkey"
+            columns: ["quality_grade_id"]
+            isOneToOne: false
+            referencedRelation: "view_item_wise_sauda_summary"
+            referencedColumns: ["quality_grade_id"]
+          },
+          {
             foreignKeyName: "godown_chits_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trips"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inventory_transactions: {
-        Row: {
-          id: string
-          transaction_date: string
-          invoice_no: string | null
-          party_id: string
-          quality_grade_id: string
-          lorry_number: string | null
-          weight_mt: number
-          weight_kg: number | null
-          transaction_type: string
-          status: string
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: string
-          transaction_date?: string
-          invoice_no?: string | null
-          party_id: string
-          quality_grade_id: string
-          lorry_number?: string | null
-          weight_mt?: number
-          weight_kg?: number | null
-          transaction_type?: string
-          status?: string
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          transaction_date?: string
-          invoice_no?: string | null
-          party_id?: string
-          quality_grade_id?: string
-          lorry_number?: string | null
-          weight_mt?: number
-          weight_kg?: number | null
-          transaction_type?: string
-          status?: string
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inventory_transactions_party_id_fkey"
-            columns: ["party_id"]
-            isOneToOne: false
-            referencedRelation: "parties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inventory_transactions_quality_grade_id_fkey"
-            columns: ["quality_grade_id"]
-            isOneToOne: false
-            referencedRelation: "quality_grades"
             referencedColumns: ["id"]
           },
         ]
@@ -359,6 +371,87 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "quality_grades"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_stocks_quality_grade_id_fkey"
+            columns: ["quality_grade_id"]
+            isOneToOne: true
+            referencedRelation: "view_item_wise_sauda_summary"
+            referencedColumns: ["quality_grade_id"]
+          },
+        ]
+      }
+      inventory_transactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          invoice_no: string | null
+          lorry_number: string | null
+          party_id: string | null
+          quality_grade_id: string
+          status: string
+          transaction_date: string
+          transaction_type: string
+          updated_at: string | null
+          weight_kg: number | null
+          weight_mt: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          invoice_no?: string | null
+          lorry_number?: string | null
+          party_id?: string | null
+          quality_grade_id: string
+          status?: string
+          transaction_date?: string
+          transaction_type?: string
+          updated_at?: string | null
+          weight_kg?: number | null
+          weight_mt?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          invoice_no?: string | null
+          lorry_number?: string | null
+          party_id?: string | null
+          quality_grade_id?: string
+          status?: string
+          transaction_date?: string
+          transaction_type?: string
+          updated_at?: string | null
+          weight_kg?: number | null
+          weight_mt?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_transactions_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_transactions_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "view_party_turnover_summary"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "inventory_transactions_quality_grade_id_fkey"
+            columns: ["quality_grade_id"]
+            isOneToOne: false
+            referencedRelation: "quality_grades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_transactions_quality_grade_id_fkey"
+            columns: ["quality_grade_id"]
+            isOneToOne: false
+            referencedRelation: "view_item_wise_sauda_summary"
+            referencedColumns: ["quality_grade_id"]
           },
         ]
       }
@@ -481,17 +574,104 @@ export type Database = {
         }
         Relationships: []
       }
-      test_ping: {
+      transporters: {
         Row: {
-          id: number
+          city: string | null
+          contact_person: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean
+          name: string
+          phone: string | null
+          updated_at: string | null
         }
         Insert: {
-          id: number
+          city?: string | null
+          contact_person?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          updated_at?: string | null
         }
         Update: {
-          id?: number
+          city?: string | null
+          contact_person?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          updated_at?: string | null
         }
         Relationships: []
+      }
+      transports: {
+        Row: {
+          created_at: string | null
+          default_freight_rate_per_mt: number | null
+          default_route: string | null
+          default_tare_weight_mt: number | null
+          driver_name: string | null
+          driver_phone: string | null
+          fixed_trip_charge: number | null
+          id: string
+          is_active: boolean
+          material_type: string | null
+          transporter_id: string | null
+          transporter_name: string | null
+          updated_at: string | null
+          vehicle_number: string
+        }
+        Insert: {
+          created_at?: string | null
+          default_freight_rate_per_mt?: number | null
+          default_route?: string | null
+          default_tare_weight_mt?: number | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          fixed_trip_charge?: number | null
+          id?: string
+          is_active?: boolean
+          material_type?: string | null
+          transporter_id?: string | null
+          transporter_name?: string | null
+          updated_at?: string | null
+          vehicle_number: string
+        }
+        Update: {
+          created_at?: string | null
+          default_freight_rate_per_mt?: number | null
+          default_route?: string | null
+          default_tare_weight_mt?: number | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          fixed_trip_charge?: number | null
+          id?: string
+          is_active?: boolean
+          material_type?: string | null
+          transporter_id?: string | null
+          transporter_name?: string | null
+          updated_at?: string | null
+          vehicle_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transports_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transports_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "view_party_turnover_summary"
+            referencedColumns: ["party_id"]
+          },
+        ]
       }
       trips: {
         Row: {
@@ -534,27 +714,54 @@ export type Database = {
       vehicles: {
         Row: {
           created_at: string | null
+          default_freight_rate_per_mt: number | null
+          default_route: string | null
+          driver_name: string | null
+          driver_phone: string | null
+          fixed_trip_charge: number | null
           id: string
+          is_active: boolean
           last_known_tare_weight: number | null
           plate_number: string
           tare_captured_at: string | null
           transporter_id: string | null
+          transporter_name: string | null
+          updated_at: string | null
+          vehicle_capacity_mt: number | null
         }
         Insert: {
           created_at?: string | null
+          default_freight_rate_per_mt?: number | null
+          default_route?: string | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          fixed_trip_charge?: number | null
           id?: string
+          is_active?: boolean
           last_known_tare_weight?: number | null
           plate_number: string
           tare_captured_at?: string | null
           transporter_id?: string | null
+          transporter_name?: string | null
+          updated_at?: string | null
+          vehicle_capacity_mt?: number | null
         }
         Update: {
           created_at?: string | null
+          default_freight_rate_per_mt?: number | null
+          default_route?: string | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          fixed_trip_charge?: number | null
           id?: string
+          is_active?: boolean
           last_known_tare_weight?: number | null
           plate_number?: string
           tare_captured_at?: string | null
           transporter_id?: string | null
+          transporter_name?: string | null
+          updated_at?: string | null
+          vehicle_capacity_mt?: number | null
         }
         Relationships: [
           {
@@ -563,6 +770,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "view_party_turnover_summary"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -615,11 +829,61 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      view_daily_scrap_movement: {
+        Row: {
+          date: string | null
+          inward_receipt_mt: number | null
+          net_day_balance_mt: number | null
+          outward_dispatch_mt: number | null
+          scrap_grade_name: string | null
+        }
+        Relationships: []
+      }
+      view_item_wise_sauda_summary: {
+        Row: {
+          hsn_code: string | null
+          max_sauda_rate: number | null
+          min_sauda_rate: number | null
+          quality_grade_id: string | null
+          scrap_grade_name: string | null
+          total_deals: number | null
+          total_quantity_mt: number | null
+          total_rtgs_difference_inr: number | null
+          total_sauda_value_inr: number | null
+          weighted_avg_bill_rate: number | null
+          weighted_avg_sauda_rate: number | null
+        }
+        Relationships: []
+      }
+      view_party_turnover_summary: {
+        Row: {
+          city: string | null
+          gstin: string | null
+          party_code: string | null
+          party_id: string | null
+          party_name: string | null
+          pending_rtgs_difference_inr: number | null
+          total_bills: number | null
+          total_sauda_turnover_inr: number | null
+          total_tonnage_mt: number | null
+        }
+        Relationships: []
+      }
+      view_transporter_haulage: {
+        Row: {
+          city: string | null
+          first_dispatch_date: string | null
+          latest_dispatch_date: string | null
+          total_dispatches_handled: number | null
+          total_mt_hauled: number | null
+          transporter_id: string | null
+          transporter_name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
@@ -752,7 +1016,6 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
 
 /**
  * Initialized typed Supabase client.
