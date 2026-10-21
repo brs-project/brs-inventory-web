@@ -66,9 +66,9 @@ export function App() {
 
               {/* Master Data Routes */}
               <Route path="/master" element={<MasterHub />} />
-              <Route path="/master/parties" element={<MasterHub defaultTab="parties" />} />
-              <Route path="/master/transporters" element={<MasterHub defaultTab="transporters" />} />
-              <Route path="/master/qualities" element={<MasterHub defaultTab="grades" />} />
+              <Route path="/master/parties" element={<Navigate to="/master?tab=parties" replace />} />
+              <Route path="/master/transporters" element={<Navigate to="/master?tab=transporters" replace />} />
+              <Route path="/master/qualities" element={<Navigate to="/master?tab=grades" replace />} />
               <Route path="/master/transports" element={<Transports />} />
               <Route path="/master/vehicles" element={<Transports />} />
 

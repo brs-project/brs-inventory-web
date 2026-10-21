@@ -3,8 +3,6 @@ import { NavLink, useLocation } from 'react-router-dom'
 import {
   Package,
   LayoutDashboard,
-  Users,
-  Award,
   PlusCircle,
   ClipboardList,
   ArrowUpFromLine,
@@ -55,21 +53,6 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Master Hub',
         path: '/master',
         icon: <Layers className="h-4 w-4" />,
-      },
-      {
-        label: 'Parties',
-        path: '/master/parties',
-        icon: <Users className="h-4 w-4" />,
-      },
-      {
-        label: 'Transporters',
-        path: '/master/transporters',
-        icon: <Truck className="h-4 w-4" />,
-      },
-      {
-        label: 'Qualities',
-        path: '/master/qualities',
-        icon: <Award className="h-4 w-4" />,
       },
     ],
   },

@@ -1,7 +1,9 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import type { ColumnDef } from '@tanstack/react-table'
 import {
+  ChevronRight,
+  Home,
   Building2,
   Truck,
   Award,
@@ -34,35 +36,39 @@ import type { CreateTransporterInput } from '@/services/transporterService'
 
 export type MasterTab = 'parties' | 'transporters' | 'grades'
 
-interface MasterHubProps {
+export interface MasterHubProps {
+  initialTab?: MasterTab
   defaultTab?: MasterTab
 }
 
-export function MasterHub({ defaultTab }: MasterHubProps) {
+export function MasterHub({ initialTab, defaultTab }: MasterHubProps) {
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin'
   const [searchParams, setSearchParams] = useSearchParams()
 
-  // Determine active tab from prop, query parameter (?tab=...), or fallback to 'parties'
-  const initialTab: MasterTab =
-    defaultTab || (searchParams.get('tab') as MasterTab) || 'parties'
-  const [activeTab, setActiveTab] = useState<MasterTab>(initialTab)
+  // Determine initial tab: URL query param -> initialTab/defaultTab prop -> 'parties'
+  const tabFromUrl = searchParams.get('tab') as MasterTab | null
+  const startingTab: MasterTab =
+    (tabFromUrl && ['parties', 'transporters', 'grades'].includes(tabFromUrl) ? tabFromUrl : null) ||
+    initialTab ||
+    defaultTab ||
+    'parties'
 
-  // Sync tab with props or URL query params
+  const [activeTab, setActiveTab] = useState<MasterTab>(startingTab)
+
+  // Sync activeTab with URL search params when user navigates (e.g. back/forward button or external change)
   useEffect(() => {
-    if (defaultTab) {
-      setActiveTab(defaultTab)
-    } else {
-      const qTab = searchParams.get('tab') as MasterTab
-      if (qTab && ['parties', 'transporters', 'grades'].includes(qTab)) {
-        setActiveTab(qTab)
-      }
+    const qTab = searchParams.get('tab') as MasterTab | null
+    if (qTab && ['parties', 'transporters', 'grades'].includes(qTab)) {
+      setActiveTab(qTab)
     }
-  }, [defaultTab, searchParams])
+  }, [searchParams])
 
+  // Single-Click Instant State Switch:
+  // Synchronously updates local state on the very first click, then syncs URL search params
   const handleTabChange = (tab: MasterTab) => {
     setActiveTab(tab)
-    setSearchParams({ tab })
+    setSearchParams({ tab }, { replace: true })
   }
 
   // =========================================================================
@@ -800,12 +806,45 @@ export function MasterHub({ defaultTab }: MasterHubProps) {
     }
   }
 
+  // Dynamic Header & Breadcrumbs based on activeTab
+  const tabConfig = {
+    parties: {
+      title: 'Party Master',
+      subtitle: 'Unified directory of registered buyer and seller commercial trading accounts.',
+      breadcrumb: 'Parties',
+    },
+    transporters: {
+      title: 'Transporters Master',
+      subtitle: 'Directory of authorized logistics transporter agencies and fleet operators.',
+      breadcrumb: 'Transporters',
+    },
+    grades: {
+      title: 'Quality Grades Master',
+      subtitle: 'Specifications, default rates, and live warehouse inventory positions across scrap grades.',
+      breadcrumb: 'Quality Grades',
+    },
+  }[activeTab]
+
   return (
     <div className="space-y-5 select-none pb-12">
-      {/* Header */}
+      {/* Breadcrumb: Home > Master Data > Parties / Transporters / Quality Grades */}
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+        <Link to="/dashboard" className="hover:text-blue-600 transition flex items-center gap-1">
+          <Home className="h-3.5 w-3.5" />
+          <span>Home</span>
+        </Link>
+        <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+        <Link to="/master" className="hover:text-blue-600 transition">
+          <span>Master Data</span>
+        </Link>
+        <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+        <span className="font-bold text-slate-800">{tabConfig.breadcrumb}</span>
+      </nav>
+
+      {/* Dynamic Header */}
       <PageHeader
-        title="Master Data Hub"
-        subtitle="Unified configuration of trading accounts, logistics transporter agencies, and commodity quality grades."
+        title={tabConfig.title}
+        subtitle={tabConfig.subtitle}
       />
 
       {/* =========================================================================

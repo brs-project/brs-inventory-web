@@ -62,14 +62,22 @@ export function Topbar({
     switch (pathname) {
       case '/dashboard':
         return { title: 'Dashboard', section: 'Home', current: 'Overview' }
-      case '/master':
-        return { title: 'Master Data Hub', section: 'Master Data', current: 'Master Hub' }
+      case '/master': {
+        const tabParam = new URLSearchParams(location.search).get('tab')
+        if (tabParam === 'transporters') {
+          return { title: 'Transporters Master', section: 'Master Data', current: 'Transporters' }
+        }
+        if (tabParam === 'grades') {
+          return { title: 'Quality Grades Master', section: 'Master Data', current: 'Quality Grades' }
+        }
+        return { title: 'Party Master', section: 'Master Data', current: 'Parties' }
+      }
       case '/master/transporters':
         return { title: 'Transporters Master', section: 'Master Data', current: 'Transporters' }
       case '/master/parties':
         return { title: 'Party Master', section: 'Master Data', current: 'Parties' }
       case '/master/qualities':
-        return { title: 'Quality Master', section: 'Master Data', current: 'Qualities' }
+        return { title: 'Quality Grades Master', section: 'Master Data', current: 'Quality Grades' }
       case '/master/transports':
       case '/master/vehicles':
         return { title: 'Vehicles & Transports', section: 'Master Data', current: 'Transports' }
