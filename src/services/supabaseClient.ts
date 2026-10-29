@@ -61,6 +61,7 @@ export type Database = {
       bill_settlements: {
         Row: {
           actual_rate: number
+          amount_paid: number | null
           bank_utr: string | null
           bill_date: string
           bill_rate: number
@@ -72,6 +73,7 @@ export type Database = {
           notes: string | null
           party_id: string
           payment_mode: string | null
+          payment_reference: string | null
           payment_status: string | null
           quality_grade_id: string | null
           quantity_kg: number | null
@@ -83,6 +85,7 @@ export type Database = {
         }
         Insert: {
           actual_rate: number
+          amount_paid?: number | null
           bank_utr?: string | null
           bill_date?: string
           bill_rate: number
@@ -94,6 +97,7 @@ export type Database = {
           notes?: string | null
           party_id: string
           payment_mode?: string | null
+          payment_reference?: string | null
           payment_status?: string | null
           quality_grade_id?: string | null
           quantity_kg?: number | null
@@ -105,6 +109,7 @@ export type Database = {
         }
         Update: {
           actual_rate?: number
+          amount_paid?: number | null
           bank_utr?: string | null
           bill_date?: string
           bill_rate?: number
@@ -116,6 +121,7 @@ export type Database = {
           notes?: string | null
           party_id?: string
           payment_mode?: string | null
+          payment_reference?: string | null
           payment_status?: string | null
           quality_grade_id?: string | null
           quantity_kg?: number | null
@@ -830,47 +836,32 @@ export type Database = {
       app_settings: {
         Row: {
           id: string
-          company_name: string
-          yard_address: string
-          contact_phone: string
-          contact_email: string
-          gstin: string
-          default_hsn_code: string
           weighbridge_tolerance_kg: number
-          currency_symbol: string
-          timezone: string
-          invoice_header_note: string
-          invoice_footer_terms: string
+          require_supervisor_tare_override: boolean
+          high_rate_diff_threshold: number
+          default_gst_rate: number
+          lock_settled_bills: boolean
+          default_date_preset: string
           updated_at: string | null
         }
         Insert: {
           id?: string
-          company_name?: string
-          yard_address?: string
-          contact_phone?: string
-          contact_email?: string
-          gstin?: string
-          default_hsn_code?: string
           weighbridge_tolerance_kg?: number
-          currency_symbol?: string
-          timezone?: string
-          invoice_header_note?: string
-          invoice_footer_terms?: string
+          require_supervisor_tare_override?: boolean
+          high_rate_diff_threshold?: number
+          default_gst_rate?: number
+          lock_settled_bills?: boolean
+          default_date_preset?: string
           updated_at?: string | null
         }
         Update: {
           id?: string
-          company_name?: string
-          yard_address?: string
-          contact_phone?: string
-          contact_email?: string
-          gstin?: string
-          default_hsn_code?: string
           weighbridge_tolerance_kg?: number
-          currency_symbol?: string
-          timezone?: string
-          invoice_header_note?: string
-          invoice_footer_terms?: string
+          require_supervisor_tare_override?: boolean
+          high_rate_diff_threshold?: number
+          default_gst_rate?: number
+          lock_settled_bills?: boolean
+          default_date_preset?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -923,6 +914,49 @@ export type Database = {
         }
         Relationships: []
       }
+      view_rate_difference_details: {
+        Row: {
+          balance_amount: number | null
+          bill_date: string | null
+          bill_id: string | null
+          bill_rate: number | null
+          difference: number | null
+          hsn_code: string | null
+          is_high_diff: boolean | null
+          item_name: string | null
+          lorry_no: string | null
+          notes: string | null
+          paid_amount: number | null
+          party_code: string | null
+          party_id: string | null
+          party_name: string | null
+          party_phone: string | null
+          payment_mode: string | null
+          payment_reference: string | null
+          payment_status: string | null
+          qty: number | null
+          quality_grade_id: string | null
+          sauda_rate: number | null
+          total_amount: number | null
+        }
+        Relationships: []
+      }
+      view_party_payable_summary: {
+        Row: {
+          max_discrepancy: number | null
+          net_balance: number | null
+          party_code: string | null
+          party_id: string | null
+          party_name: string | null
+          party_phone: string | null
+          total_deals: number | null
+          total_paid: number | null
+          total_payable: number | null
+          total_qty: number | null
+          weighted_avg_diff: number | null
+        }
+        Relationships: []
+      }
       view_item_wise_sauda_summary: {
         Row: {
           hsn_code: string | null
@@ -935,6 +969,7 @@ export type Database = {
           total_rtgs_difference_inr: number | null
           total_sauda_value_inr: number | null
           weighted_avg_bill_rate: number | null
+          weighted_avg_diff: number | null
           weighted_avg_sauda_rate: number | null
         }
         Relationships: []

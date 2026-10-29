@@ -95,18 +95,16 @@ export function Topbar({
         return { title: 'View Bills', section: 'Billing', current: 'All Bills' }
       case '/billing/pending':
         return { title: 'Pending RTGS Payments', section: 'Billing', current: 'Pending RTGS' }
-      case '/reports/daily':
-        return { title: 'Daily Report', section: 'Reports', current: 'Daily Summary' }
-      case '/reports/stock':
-        return { title: 'Stock Report', section: 'Reports', current: 'Godown Balances' }
-      case '/reports/party':
-        return { title: 'Party Report', section: 'Reports', current: 'Party Ledger' }
-      case '/reports/vehicle':
-        return { title: 'Vehicle Report', section: 'Reports', current: 'Lorry In/Out' }
+      case '/reports/sauda':
+        return { title: 'Item-Wise Sauda Rate Report', section: 'Reports', current: 'Sauda Rate' }
+      case '/reports/rate-difference':
+        return { title: 'Rate Difference Report', section: 'Reports', current: 'Rate Difference' }
+      case '/profile':
+        return { title: 'My Account & Profile', section: 'Account', current: 'My Profile' }
       case '/settings/users':
         return { title: 'User Management', section: 'Settings', current: 'Users & Roles' }
       case '/settings/app':
-        return { title: 'App Settings', section: 'Settings', current: 'Configuration' }
+        return { title: 'App Settings', section: 'Settings', current: 'Operational Rules' }
       default:
         return { title: 'Inventory Manager', section: 'Home', current: 'Page' }
     }
@@ -249,7 +247,7 @@ export function Topbar({
 
               <div className="space-y-0.5 text-xs font-medium">
                 <Link
-                  to="/settings/users"
+                  to="/profile"
                   onClick={() => setUserMenuOpen(false)}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
                 >

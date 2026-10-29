@@ -191,3 +191,67 @@ export async function deleteUser(id: string, currentUserId?: string): Promise<vo
     throw error
   }
 }
+
+/**
+ * Fetch a single user profile by id or email
+ */
+export async function fetchUserProfile(idOrEmail: string): Promise<UserProfileItem | null> {
+  const isEmail = idOrEmail.includes('@')
+  const query = supabase.from('user_profiles').select('*')
+  const { data, error } = isEmail
+    ? await query.eq('email', idOrEmail.trim().toLowerCase()).maybeSingle()
+    : await query.eq('id', idOrEmail).maybeSingle()
+
+  if (error) {
+    console.error('Error fetching user profile:', error)
+    return null
+  }
+  if (!data) return null
+
+  return {
+    id: data.id,
+    full_name: data.full_name,
+    email: data.email,
+    phone: data.phone,
+    role: normalizeRole(data.role),
+    is_active: Boolean(data.is_active),
+    created_at: data.created_at || new Date().toISOString(),
+    updated_at: data.updated_at,
+  }
+}
+
+/**
+ * Update personal profile details (full_name and phone) in public.user_profiles
+ */
+export async function updateUserProfile(
+  id: string,
+  payload: { full_name: string; phone?: string | null }
+): Promise<UserProfileItem> {
+  const now = new Date().toISOString()
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .update({
+      full_name: payload.full_name.trim(),
+      phone: payload.phone?.trim() || null,
+      updated_at: now,
+    })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating user profile in Supabase:', error)
+    throw error
+  }
+
+  return {
+    id: data.id,
+    full_name: data.full_name,
+    email: data.email,
+    phone: data.phone,
+    role: normalizeRole(data.role),
+    is_active: Boolean(data.is_active),
+    created_at: data.created_at || now,
+    updated_at: data.updated_at,
+  }
+}

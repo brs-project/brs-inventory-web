@@ -14,6 +14,7 @@ import {
   LogOut,
   Layers,
   TrendingUp,
+  Scale,
 } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
 import { RoleBadge } from '@components/ui/RoleBadge'
@@ -100,9 +101,14 @@ const NAV_GROUPS: NavGroup[] = [
     groupTitle: 'REPORTS',
     items: [
       {
-        label: 'Item-Wise Sauda',
+        label: 'Sauda Rate Report',
         path: '/reports/sauda',
         icon: <TrendingUp className="h-4 w-4" />,
+      },
+      {
+        label: 'Rate Difference Report',
+        path: '/reports/rate-difference',
+        icon: <Scale className="h-4 w-4" />,
       },
     ],
   },

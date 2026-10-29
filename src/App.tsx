@@ -22,7 +22,9 @@ const EditDispatch = lazy(() => import('@pages/dispatch/EditDispatch').then((m) 
 const AddBillEntry = lazy(() => import('@pages/billing/AddBillEntry').then((m) => ({ default: m.AddBillEntry })))
 const ViewBills = lazy(() => import('@pages/billing/ViewBills').then((m) => ({ default: m.ViewBills })))
 const EditBillEntry = lazy(() => import('@pages/billing/EditBillEntry').then((m) => ({ default: m.EditBillEntry })))
-const ItemWiseSaudaReport = lazy(() => import('@pages/reports/ItemWiseSaudaReport').then((m) => ({ default: m.ItemWiseSaudaReport })))
+const SaudaRateReport = lazy(() => import('@pages/reports/SaudaRateReport').then((m) => ({ default: m.SaudaRateReport })))
+const RateDifferenceReport = lazy(() => import('@pages/reports/RateDifferenceReport').then((m) => ({ default: m.RateDifferenceReport })))
+const MyProfile = lazy(() => import('@pages/profile/MyProfile').then((m) => ({ default: m.MyProfile })))
 const UserManagement = lazy(() => import('@pages/settings/UserManagement').then((m) => ({ default: m.UserManagement })))
 const AppSettings = lazy(() => import('@pages/settings/AppSettings').then((m) => ({ default: m.AppSettings })))
 const NotFound = lazy(() => import('@pages/NotFound').then((m) => ({ default: m.NotFound })))
@@ -84,13 +86,24 @@ export function App() {
               <Route path="/billing/edit/:id" element={<EditBillEntry />} />
 
               {/* Reports Routes */}
-              <Route path="/reports" element={<ItemWiseSaudaReport />} />
-              <Route path="/reports/sauda" element={<ItemWiseSaudaReport />} />
-              <Route path="/reports/item-wise-sauda" element={<ItemWiseSaudaReport />} />
+              <Route path="/reports" element={<Navigate to="/reports/sauda" replace />} />
+              <Route path="/reports/sauda" element={<SaudaRateReport />} />
+              <Route path="/reports/item-wise-sauda" element={<SaudaRateReport />} />
+              <Route path="/reports/rate-difference" element={<RateDifferenceReport />} />
+
+              {/* Account Profile Route */}
+              <Route path="/profile" element={<MyProfile />} />
 
               {/* Settings Routes */}
               <Route path="/settings" element={<Navigate to="/settings/app" replace />} />
-              <Route path="/settings/users" element={<UserManagement />} />
+              <Route
+                path="/settings/users"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <UserManagement />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/settings/app" element={<AppSettings />} />
             </Route>
 

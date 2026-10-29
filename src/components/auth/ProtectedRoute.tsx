@@ -5,9 +5,10 @@ import { useAuthStore } from '@store/authStore'
 
 interface ProtectedRouteProps {
   children?: ReactNode
+  allowedRoles?: string[]
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { user, clearUser } = useAuthStore()
   const location = useLocation()
 
@@ -47,7 +48,16 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     )
   }
 
-  // 3. Authenticated and active
+  // 3. Role-based Access Guard
+  if (allowedRoles && allowedRoles.length > 0) {
+    const userRole = (user.role || '').toLowerCase()
+    const hasRole = allowedRoles.some((r) => r.toLowerCase() === userRole)
+    if (!hasRole) {
+      return <Navigate to="/dashboard" replace />
+    }
+  }
+
+  // 4. Authenticated, active, and permitted
   return <>{children}</>
 }
 
