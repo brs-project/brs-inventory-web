@@ -827,6 +827,90 @@ export type Database = {
           },
         ]
       }
+      app_settings: {
+        Row: {
+          id: string
+          company_name: string
+          yard_address: string
+          contact_phone: string
+          contact_email: string
+          gstin: string
+          default_hsn_code: string
+          weighbridge_tolerance_kg: number
+          currency_symbol: string
+          timezone: string
+          invoice_header_note: string
+          invoice_footer_terms: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          company_name?: string
+          yard_address?: string
+          contact_phone?: string
+          contact_email?: string
+          gstin?: string
+          default_hsn_code?: string
+          weighbridge_tolerance_kg?: number
+          currency_symbol?: string
+          timezone?: string
+          invoice_header_note?: string
+          invoice_footer_terms?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          company_name?: string
+          yard_address?: string
+          contact_phone?: string
+          contact_email?: string
+          gstin?: string
+          default_hsn_code?: string
+          weighbridge_tolerance_kg?: number
+          currency_symbol?: string
+          timezone?: string
+          invoice_header_note?: string
+          invoice_footer_terms?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          id: string
+          full_name: string
+          email: string
+          phone: string | null
+          role: string
+          is_active: boolean
+          created_at: string
+          updated_at: string | null
+          auth_user_id: string | null
+        }
+        Insert: {
+          id?: string
+          full_name: string
+          email: string
+          phone?: string | null
+          role?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string | null
+          auth_user_id?: string | null
+        }
+        Update: {
+          id?: string
+          full_name?: string
+          email?: string
+          phone?: string | null
+          role?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string | null
+          auth_user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       view_daily_scrap_movement: {

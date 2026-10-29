@@ -6,7 +6,6 @@ import {
   Truck,
   RotateCw,
   PlusCircle,
-  FileSpreadsheet,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { format } from 'date-fns'
@@ -57,14 +56,6 @@ export function Dashboard() {
               />
               <span>Refresh</span>
             </button>
-
-            <Link
-              to="/reports/daily"
-              className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold shadow-sm transition"
-            >
-              <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
-              <span>Daily Report</span>
-            </Link>
 
             <Link
               to="/inventory/add"

@@ -9,11 +9,6 @@ import {
   Send,
   Receipt,
   FileSpreadsheet,
-  CreditCard,
-  Calendar,
-  Boxes,
-  UserCheck,
-  Truck,
   UserCog,
   Settings,
   LogOut,
@@ -96,13 +91,8 @@ const NAV_GROUPS: NavGroup[] = [
       },
       {
         label: 'Bill Sheet',
-        path: '/billing/list',
+        path: '/billing/sheet',
         icon: <FileSpreadsheet className="h-4 w-4" />,
-      },
-      {
-        label: 'Pending RTGS',
-        path: '/billing/pending',
-        icon: <CreditCard className="h-4 w-4" />,
       },
     ],
   },
@@ -110,29 +100,9 @@ const NAV_GROUPS: NavGroup[] = [
     groupTitle: 'REPORTS',
     items: [
       {
-        label: 'Daily Report',
-        path: '/reports/daily',
-        icon: <Calendar className="h-4 w-4" />,
-      },
-      {
         label: 'Item-Wise Sauda',
         path: '/reports/sauda',
         icon: <TrendingUp className="h-4 w-4" />,
-      },
-      {
-        label: 'Stock Report',
-        path: '/reports/stock',
-        icon: <Boxes className="h-4 w-4" />,
-      },
-      {
-        label: 'Party Report',
-        path: '/reports/party',
-        icon: <UserCheck className="h-4 w-4" />,
-      },
-      {
-        label: 'Vehicle Report',
-        path: '/reports/vehicle',
-        icon: <Truck className="h-4 w-4" />,
       },
     ],
   },
@@ -162,7 +132,7 @@ export interface SidebarProps {
 export function Sidebar({ onItemClick, className }: SidebarProps) {
   const { user, signOut } = useAuth()
   const location = useLocation()
-  const isAdmin = user?.role === 'admin'
+  const isAdmin = user?.role?.toLowerCase() === 'admin'
 
   const getInitials = (name?: string) => {
     if (!name) return 'U'

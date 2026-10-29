@@ -8,3 +8,5 @@ export * from './transportService'
 export * from './transporterService'
 
 export * from './reportService'
+export * from './userService'
+export * from './appSettingsService'

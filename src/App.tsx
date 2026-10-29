@@ -22,12 +22,7 @@ const EditDispatch = lazy(() => import('@pages/dispatch/EditDispatch').then((m) 
 const AddBillEntry = lazy(() => import('@pages/billing/AddBillEntry').then((m) => ({ default: m.AddBillEntry })))
 const ViewBills = lazy(() => import('@pages/billing/ViewBills').then((m) => ({ default: m.ViewBills })))
 const EditBillEntry = lazy(() => import('@pages/billing/EditBillEntry').then((m) => ({ default: m.EditBillEntry })))
-const PendingRTGS = lazy(() => import('@pages/billing/PendingRTGS').then((m) => ({ default: m.PendingRTGS })))
-const DailyReport = lazy(() => import('@pages/reports/DailyReport').then((m) => ({ default: m.DailyReport })))
 const ItemWiseSaudaReport = lazy(() => import('@pages/reports/ItemWiseSaudaReport').then((m) => ({ default: m.ItemWiseSaudaReport })))
-const StockReport = lazy(() => import('@pages/reports/StockReport').then((m) => ({ default: m.StockReport })))
-const PartyReport = lazy(() => import('@pages/reports/PartyReport').then((m) => ({ default: m.PartyReport })))
-const VehicleReport = lazy(() => import('@pages/reports/VehicleReport').then((m) => ({ default: m.VehicleReport })))
 const UserManagement = lazy(() => import('@pages/settings/UserManagement').then((m) => ({ default: m.UserManagement })))
 const AppSettings = lazy(() => import('@pages/settings/AppSettings').then((m) => ({ default: m.AppSettings })))
 const NotFound = lazy(() => import('@pages/NotFound').then((m) => ({ default: m.NotFound })))
@@ -84,20 +79,17 @@ export function App() {
 
               {/* Billing Routes */}
               <Route path="/billing/add" element={<AddBillEntry />} />
+              <Route path="/billing/sheet" element={<ViewBills />} />
               <Route path="/billing/list" element={<ViewBills />} />
               <Route path="/billing/edit/:id" element={<EditBillEntry />} />
-              <Route path="/billing/pending" element={<PendingRTGS />} />
 
               {/* Reports Routes */}
-              <Route path="/reports" element={<Navigate to="/reports/daily" replace />} />
-              <Route path="/reports/daily" element={<DailyReport />} />
+              <Route path="/reports" element={<ItemWiseSaudaReport />} />
               <Route path="/reports/sauda" element={<ItemWiseSaudaReport />} />
               <Route path="/reports/item-wise-sauda" element={<ItemWiseSaudaReport />} />
-              <Route path="/reports/stock" element={<StockReport />} />
-              <Route path="/reports/party" element={<PartyReport />} />
-              <Route path="/reports/vehicle" element={<VehicleReport />} />
 
               {/* Settings Routes */}
+              <Route path="/settings" element={<Navigate to="/settings/app" replace />} />
               <Route path="/settings/users" element={<UserManagement />} />
               <Route path="/settings/app" element={<AppSettings />} />
             </Route>

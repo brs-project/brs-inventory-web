@@ -14,14 +14,6 @@ export interface ItemWiseSaudaSummaryRow {
   total_rtgs_difference_inr: number
 }
 
-export interface DailyScrapMovementRow {
-  date: string | null
-  scrap_grade_name: string | null
-  inward_receipt_mt: number
-  outward_dispatch_mt: number
-  net_day_balance_mt: number
-}
-
 /**
  * Fetches commercial Sauda rate analytics aggregated by scrap quality grade.
  * Directly queries analytical view: public.view_item_wise_sauda_summary
@@ -51,31 +43,6 @@ export async function fetchItemWiseSaudaSummary(): Promise<ItemWiseSaudaSummaryR
   }))
 }
 
-/**
- * Fetches daily scrap movement (inward receipts vs outward dispatches).
- * Directly queries analytical view: public.view_daily_scrap_movement ordered by date DESC.
- */
-export async function fetchDailyScrapMovement(): Promise<DailyScrapMovementRow[]> {
-  const { data, error } = await supabase
-    .from('view_daily_scrap_movement')
-    .select('*')
-    .order('date', { ascending: false })
-
-  if (error) {
-    console.error('Error fetching view_daily_scrap_movement:', error)
-    throw new Error(error.message || 'Failed to fetch daily scrap movement')
-  }
-
-  return (data || []).map((row) => ({
-    date: row.date,
-    scrap_grade_name: row.scrap_grade_name,
-    inward_receipt_mt: Number(row.inward_receipt_mt || 0),
-    outward_dispatch_mt: Number(row.outward_dispatch_mt || 0),
-    net_day_balance_mt: Number(row.net_day_balance_mt || 0),
-  }))
-}
-
 export default {
   fetchItemWiseSaudaSummary,
-  fetchDailyScrapMovement,
 }

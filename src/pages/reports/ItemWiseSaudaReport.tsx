@@ -1,19 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   format,
   subDays,
   startOfWeek,
   startOfMonth,
 } from 'date-fns'
-import {
-  TrendingUp,
-  ArrowDownRight,
-  ArrowUpRight,
-} from 'lucide-react'
 import { ReportLayout } from '@components/reports/ReportLayout'
 import { ItemWiseSaudaTable } from '@components/reports/ItemWiseSaudaTable'
-import { fetchDailyScrapMovement, type DailyScrapMovementRow } from '@/services/reportService'
-import { formatWeight } from '@lib/utils'
 
 export function ItemWiseSaudaReport() {
   const todayIST = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
@@ -23,22 +16,6 @@ export function ItemWiseSaudaReport() {
     format(startOfMonth(new Date()), 'yyyy-MM-dd')
   )
   const [dateTo, setDateTo] = useState<string>(todayIST)
-  const [movements, setMovements] = useState<DailyScrapMovementRow[]>([])
-  const [loadingMovements, setLoadingMovements] = useState<boolean>(true)
-
-  useEffect(() => {
-    async function loadMovements() {
-      try {
-        const rows = await fetchDailyScrapMovement()
-        setMovements(rows)
-      } catch (e) {
-        console.error('Error loading daily scrap movement:', e)
-      } finally {
-        setLoadingMovements(false)
-      }
-    }
-    loadMovements()
-  }, [])
 
   const setQuickRange = (type: 'today' | 'yesterday' | 'this_week' | 'this_month') => {
     const today = new Date()
@@ -137,78 +114,8 @@ export function ItemWiseSaudaReport() {
       activeFiltersCount={0}
       onResetFilters={handleResetFilters}
     >
-      {/* 1. Item-Wise Sauda Rate Summary Table */}
+      {/* Item-Wise Sauda Rate Summary Table */}
       <ItemWiseSaudaTable showToolbar={true} />
-
-      {/* 2. Daily Scrap Movement Analytical Section (from view_daily_scrap_movement) */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-blue-600" />
-            <h3 className="text-sm font-bold text-slate-900">
-              Daily Scrap Physical Movement (Inward Receipts vs Outward Dispatches)
-            </h3>
-          </div>
-          <span className="text-xs text-slate-500 font-medium">
-            Analytical SQL View: public.view_daily_scrap_movement
-          </span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-[11px] uppercase tracking-wider font-bold text-slate-600 select-none">
-                <th className="py-2.5 px-3">Date</th>
-                <th className="py-2.5 px-3">Scrap Quality</th>
-                <th className="py-2.5 px-3 text-right">Inward Receipt (MT)</th>
-                <th className="py-2.5 px-3 text-right">Outward Dispatch (MT)</th>
-                <th className="py-2.5 px-3 text-right">Net Day Balance (MT)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
-              {loadingMovements ? (
-                <tr>
-                  <td colSpan={5} className="py-6 text-center text-slate-400">
-                    Loading movement history...
-                  </td>
-                </tr>
-              ) : movements.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-6 text-center text-slate-400">
-                    No movement records recorded.
-                  </td>
-                </tr>
-              ) : (
-                movements.slice(0, 15).map((m, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/70 transition">
-                    <td className="py-2 px-3 font-mono font-medium text-slate-700">
-                      {m.date || '—'}
-                    </td>
-                    <td className="py-2 px-3 font-semibold text-slate-900">
-                      {m.scrap_grade_name || '—'}
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono text-emerald-700 font-bold">
-                      <span className="inline-flex items-center gap-0.5">
-                        <ArrowDownRight className="h-3 w-3 inline text-emerald-500" />
-                        {formatWeight(m.inward_receipt_mt)}
-                      </span>
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono text-amber-700 font-bold">
-                      <span className="inline-flex items-center gap-0.5">
-                        <ArrowUpRight className="h-3 w-3 inline text-amber-500" />
-                        {formatWeight(m.outward_dispatch_mt)}
-                      </span>
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono font-extrabold text-slate-800">
-                      {formatWeight(m.net_day_balance_mt)}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
     </ReportLayout>
   )
 }
